@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>preview.html</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23C4E645'/%3E%3Ctext x='50' y='60' font-family='system-ui, -apple-system, sans-serif' font-weight='900' font-size='26' letter-spacing='-1.5' fill='%23111111' text-anchor='middle'%3Eprev.%3C/text%3E%3C/svg%3E" />
+    <link rel="apple-touch-icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23C4E645'/%3E%3Ctext x='50' y='60' font-family='system-ui, -apple-system, sans-serif' font-weight='900' font-size='26' letter-spacing='-1.5' fill='%23111111' text-anchor='middle'%3Eprev.%3C/text%3E%3C/svg%3E" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
+        rel="stylesheet" />
+
+    <!-- Critical Dependencies -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Deferred Dependencies (Non-blocking) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.9/beautify-html.min.js" defer></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#C4E645",
+                        "bg-main": "#121212",
+                        "surface": "#212121",
+                        "surface-hover": "#272727",
+                        "border-subtle": "rgba(255, 255, 255, 0.08)",
+                        "text-main": "#F1F1F1",
+                        "text-muted": "#AAAAAA",
+                    },
+                    fontFamily: {
+                        display: ["'Plus Jakarta Sans'", "sans-serif"],
+                        body: ["'Inter'", "sans-serif"],
+                    },
+                    borderRadius: {
+                        '2xl': '1rem',
+                        'xl': '0.75rem',
+                        'lg': '0.5rem',
+                    },
+                    boxShadow: {
+                        'edge': 'inset 0 1px 0 0 rgba(255,255,255,0.015)',
+                    },
+                    transitionDuration: {
+                        'fast': '120ms',
+                        'medium': '160ms',
+                        'entry': '240ms',
+                    },
+                    transitionTimingFunction: {
+                        'system': 'cubic-bezier(0.4, 0, 0.2, 1)',
+                    }
+                },
+            },
+        };
+    </script>
+    <style>
+        .preload * {
+            transition: none !important;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #272727;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #AAAAAA;
+        }
+
+        body::-webkit-scrollbar {
+            width: 0px;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        :root {
+            --sidebar-width: 260px;
+            --sidebar-collapsed-width: 80px;
+            --sidebar-trans-dur: 240ms;
+            --sidebar-ease: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #main-sidebar {
+            width: var(--sidebar-width);
+            transition: width var(--sidebar-trans-dur) var(--sidebar-ease), transform var(--sidebar-trans-dur) var(--sidebar-ease);
+        }
+
+        body.sidebar-collapsed #main-sidebar {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        .nav-container {
+            padding: 0 12px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            width: 100%;
+            height: 52px;
+            padding: 0 12px;
+            margin: 0 auto;
+            cursor: pointer;
+            transition: all var(--sidebar-trans-dur) var(--sidebar-ease);
+        }
+
+        body.sidebar-collapsed .nav-item {
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            background-color: transparent !important;
+            box-shadow: none !important;
+        }
+
+        body.sidebar-collapsed .nav-item:hover {
+            background-color: #212121 !important;
+        }
+
+        .nav-item:active {
+            opacity: 0.95;
+        }
+
+        .nav-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 100%;
+            flex-shrink: 0;
+        }
+
+        .nav-text {
+            font-size: 0.875rem;
+            white-space: nowrap;
+            display: block;
+            text-align: left;
+            padding-left: 4px;
+            max-width: 150px;
+            opacity: 1;
+            overflow: hidden;
+            transition: all var(--sidebar-trans-dur) var(--sidebar-ease);
+        }
+
+        body.sidebar-collapsed .nav-text {
+            opacity: 0;
+            max-width: 0;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-divider {
+            width: 100%;
+            margin: 0.5rem auto;
+            transition: width var(--sidebar-trans-dur) var(--sidebar-ease);
+        }
+
+        body.sidebar-collapsed .sidebar-divider {
+            width: 44px;
+        }
+
+        .sidebar-credit {
+            transition: opacity var(--sidebar-trans-dur) var(--sidebar-ease);
+            white-space: nowrap;
+        }
+
+        body.sidebar-collapsed .sidebar-credit {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #main-content {
+            transition: padding-left var(--sidebar-trans-dur) var(--sidebar-ease);
+        }
+
+        @media (min-width: 768px) {
+            #main-content {
+                padding-left: var(--sidebar-width);
+            }
+
+            body.sidebar-collapsed #main-content {
+                padding-left: var(--sidebar-collapsed-width);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            #editor-pane {
+                width: var(--editor-width, 50%);
+                flex: none !important;
+            }
+        }
+
+        #drag-resizer {
+            touch-action: none;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-bg-main text-text-main font-body h-screen flex antialiased selection:bg-primary selection:text-[#121212] preload overflow-hidden">
+
+    <script>
+        if (localStorage.getItem('sidebarCollapsed') === 'true' && window.innerWidth >= 768) {
+            document.body.classList.add('sidebar-collapsed');
+        }
+    </script>
+
+    <!-- Top Navbar -->
+    <header
+        class="fixed top-0 left-0 w-full h-16 bg-bg-main/95 backdrop-blur-md border-b border-border-subtle flex items-center justify-between px-4 md:px-6 z-50">
+        <div class="flex items-center gap-4 md:gap-6">
+            <button id="toggle-sidebar" class="text-text-main hover:bg-surface-hover w-11 h-11 flex items-center justify-center -ml-2 rounded-full transition-colors shrink-0">
+                <i data-lucide="menu" class="w-5 h-5 opacity-80"></i>
+            </button>
+            <div class="text-xl md:text-2xl font-display tracking-tight">
+                <span class="text-primary font-medium mr-[2px]">preview.</span><span class="text-text-main font-bold">html</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <div id="status-indicator"
+                class="hidden items-center gap-2 text-xs font-medium text-text-muted bg-surface px-3 py-1.5 rounded-full transition-opacity">
+                <span class="w-2 h-2 rounded-full bg-primary/80 animate-pulse"></span>
+                <span>Auto-updating</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar Overlay -->
+    <div id="sidebar-overlay"
+        class="fixed inset-0 top-16 bg-black/60 z-30 hidden opacity-0 transition-opacity duration-300 md:!hidden"></div>
+
+    <!-- Main Sidebar -->
+    <aside id="main-sidebar"
+        class="fixed top-16 left-0 h-[calc(100vh-4rem)] bg-bg-main z-40 transform transition-transform duration-[250ms] ease-in-out border-r border-border-subtle flex flex-col pt-4 pb-6 overflow-y-auto overflow-x-hidden hide-scrollbar -translate-x-full md:translate-x-0">
+        <div class="nav-container flex flex-col gap-1.5 w-full mt-2">
+
+            <button id="btn-open-tab" title="Preview (New Tab)" class="nav-item text-text-muted hover:text-text-main hover:bg-surface group">
+                <div class="nav-icon"><i data-lucide="external-link" class="w-5 h-5 text-primary group-hover:scale-110 transition-transform duration-fast"></i></div>
+                <span class="nav-text font-medium text-text-main">Preview (New Tab)</span>
+            </button>
+
+            <button id="btn-format" title="Format Code" class="nav-item text-text-muted hover:text-text-main hover:bg-surface group">
+                <div class="nav-icon"><i data-lucide="align-left" class="w-5 h-5 text-text-muted group-hover:text-text-main transition-colors duration-fast"></i></div>
+                <span class="nav-text font-medium">Format</span>
+            </button>
+
+            <button id="btn-clear" title="Clear Editor" class="nav-item text-text-muted hover:text-text-main hover:bg-surface group">
+                <div class="nav-icon"><i data-lucide="eraser" class="w-5 h-5 text-text-muted group-hover:text-text-main transition-colors duration-fast"></i></div>
+                <span class="nav-text font-medium">Clear</span>
+            </button>
+
+            <button id="btn-sample" title="Load Sample" class="nav-item text-text-muted hover:text-text-main hover:bg-surface group">
+                <div class="nav-icon"><i data-lucide="file-code-2" class="w-5 h-5 text-text-muted group-hover:text-text-main transition-colors duration-fast"></i></div>
+                <span class="nav-text font-medium">Sample</span>
+            </button>
+
+            <button id="btn-reset" title="Reset All" class="nav-item text-text-muted hover:text-red-400 hover:bg-red-500/10 group transition-colors">
+                <div class="nav-icon"><i data-lucide="rotate-ccw" class="w-5 h-5 text-text-muted group-hover:text-red-400 transition-colors duration-fast"></i></div>
+                <span class="nav-text font-medium">Reset</span>
+            </button>
+
+            <div class="sidebar-divider h-px bg-border-subtle my-2"></div>
+
+            <button id="btn-import" title="Import HTML" class="nav-item text-text-muted hover:text-text-main hover:bg-surface group">
+                <div class="nav-icon"><i data-lucide="folder-input" class="w-5 h-5 text-text-muted group-hover:text-text-main transition-colors duration-fast"></i></div>
+                <span class="nav-text font-medium">Import</span>
+            </button>
+            <input type="file" id="file-input" accept=".html,.htm,.txt" class="hidden" />
+
+            <button id="btn-export" title="Export HTML" class="nav-item text-text-muted hover:text-text-main hover:bg-surface group">
+                <div class="nav-icon"><i data-lucide="download" class="w-5 h-5 text-text-muted group-hover:text-text-main transition-colors duration-fast"></i></div>
+                <span class="nav-text font-medium">Export</span>
+            </button>
+
+            <button id="btn-copy" title="Copy to Clipboard" class="nav-item text-text-muted hover:text-text-main hover:bg-surface group">
+                <div class="nav-icon"><i data-lucide="copy" class="w-5 h-5 text-text-muted group-hover:text-text-main transition-colors duration-fast"></i></div>
+                <span class="nav-text font-medium">Copy</span>
+            </button>
+        </div>
+
+        <!-- Built by Credit -->
+        <div class="mt-auto pb-8 w-full sidebar-credit flex justify-start">
+            <a href="https://ux.mdkaif.in" target="_blank" rel="noopener noreferrer"
+                class="flex items-baseline gap-1.5 pl-6 opacity-100 outline-none">
+                <span class="text-[10px] text-text-muted uppercase tracking-widest font-bold">Built by</span>
+                <div class="text-[14px] font-display tracking-tight">
+                    <span class="text-primary font-medium mr-[1px]">ux.</span><span class="text-text-main font-bold">mdkaif</span>
+                </div>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <main id="main-content" class="w-full flex-1 pt-16 flex flex-col h-screen">
+        <div id="split-container"
+            class="flex-1 w-full flex flex-col lg:flex-row border-t border-border-subtle bg-bg-main">
+
+            <!-- Editor Pane -->
+            <div id="editor-pane"
+                class="flex-1 lg:flex-none flex flex-col relative min-h-[50vh] lg:min-h-0 bg-[#1e1e1e]">
+                <div
+                    class="h-10 border-b border-border-subtle flex items-center px-4 justify-between bg-[#111111] shrink-0 z-10">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="code" class="w-4 h-4 text-text-muted"></i>
+                        <span class="text-[11px] font-semibold text-text-muted uppercase tracking-wider">HTML Editor</span>
+                    </div>
+                </div>
+
+                <!-- Monaco Editor Container (Loaded instantly with placeholder) -->
+                <div id="editor-container" class="flex-1 w-full h-full relative"></div>
+            </div>
+
+            <!-- Resizer Divider -->
+            <div id="drag-resizer"
+                class="hidden lg:flex w-1 bg-border-subtle hover:bg-white/10 active:bg-white/20 cursor-col-resize z-10 transition-colors duration-fast relative group"
+                title="Drag to resize panels">
+                <div class="absolute inset-y-0 -left-1 -right-1"></div>
+            </div>
+
+            <!-- Preview Pane -->
+            <div id="preview-pane" class="flex-1 flex flex-col relative min-h-[50vh] lg:min-h-0 bg-[#1e1e1e]">
+                <div
+                    class="h-10 border-b border-border-subtle flex items-center px-4 justify-between bg-[#111111] shrink-0 z-10">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="monitor" class="w-4 h-4 text-text-muted"></i>
+                        <span class="text-[11px] font-semibold text-text-muted uppercase tracking-wider">Live Preview</span>
+                    </div>
+
+                    <!-- Responsive Controls -->
+                    <div class="flex items-center gap-1 bg-[#161616] rounded-md p-0.5 border border-border-subtle">
+                        <button id="res-desktop" class="p-1.5 rounded text-text-main bg-surface shadow-sm transition-all" title="Desktop View (Full Width)">
+                            <i data-lucide="monitor" class="w-3.5 h-3.5"></i>
+                        </button>
+                        <button id="res-mobile" class="p-1.5 rounded text-text-muted hover:text-text-main hover:bg-surface-hover transition-all" title="Mobile View (375px)">
+                            <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex-1 w-full flex justify-center bg-[#1e1e1e] overflow-hidden">
+                    <iframe id="preview-frame" sandbox="allow-scripts allow-forms allow-popups allow-modals"
+                        class="w-full h-full bg-transparent border-none transition-all duration-300 ease-out"
+                        style="max-width: 100%;"></iframe>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <script>
+        // 1. Core State & Data
+        const SAMPLE_HTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clean Canvas</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #1e1e1e;
+            color: #ededed;
+            padding: 40px;
+            margin: 0;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+        h1 {
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+        p {
+            color: #a0a0a0;
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to preview.html</h1>
+    <p>A clean, focused environment for writing HTML, CSS, and JavaScript.</p>
+    
+    <script>
+        // Write your JavaScript here
+    <\/script>
+</body>
+</html>`;
+
+        let isLivePreview = true;
+        let isMobileOpen = false;
+        let isDesktopCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+        let monacoEditor;
+
+        // 2. DOM Elements
+        const sidebar = document.getElementById('main-sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const toggleBtn = document.getElementById('toggle-sidebar');
+        const body = document.body;
+        const previewFrame = document.getElementById('preview-frame');
+        const statusIndicator = document.getElementById('status-indicator');
+        const fileInput = document.getElementById('file-input');
+        const editorContainer = document.getElementById('editor-container');
+
+        // 3. Instant UI Render
+        lucide.createIcons({
+            attrs: {
+                'stroke-width': 2
+            }
+        });
+        setTimeout(() => document.body.classList.remove('preload'), 100);
+
+        // Pre-fill preview frame immediately so it feels completely loaded
+        previewFrame.srcdoc = SAMPLE_HTML;
+
+        // Create lightweight syntax ghost for the editor pane
+        const escapedHtml = SAMPLE_HTML.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        editorContainer.innerHTML = `<pre id="editor-placeholder" class="p-4 text-[14px] leading-[24px] text-text-muted/40 overflow-hidden h-full select-none" style="font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;">${escapedHtml}</pre>`;
+
+        // 4. Lazy Load Monaco Editor
+        function initializeMonaco() {
+            const loaderScript = document.createElement('script');
+            loaderScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js';
+            loaderScript.onload = () => {
+                require.config({
+                    paths: {
+                        'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs'
+                    }
+                });
+                require(['vs/editor/editor.main'], function() {
+
+                    // Clear the lightweight placeholder
+                    const placeholder = document.getElementById('editor-placeholder');
+                    if (placeholder) placeholder.remove();
+
+                    monacoEditor = monaco.editor.create(editorContainer, {
+                        value: SAMPLE_HTML,
+                        language: 'html',
+                        theme: 'vs-dark',
+                        automaticLayout: true,
+                        minimap: {
+                            enabled: false
+                        },
+                        fontSize: 14,
+                        fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace",
+                        fontLigatures: true,
+                        padding: {
+                            top: 16,
+                            bottom: 16
+                        },
+                        scrollBeyondLastLine: false,
+                        smoothScrolling: true,
+                        cursorBlinking: "smooth",
+                        cursorSmoothCaretAnimation: "on",
+                        formatOnPaste: true,
+                        wordWrap: 'on',
+                        lineHeight: 24,
+                        scrollbar: {
+                            verticalScrollbarSize: 8,
+                            horizontalScrollbarSize: 8
+                        }
+                    });
+
+                    monacoEditor.onDidChangeModelContent(() => {
+                        if (isLivePreview) {
+                            statusIndicator.classList.remove('hidden');
+                            statusIndicator.classList.add('flex');
+                            debouncedUpdate();
+                        }
+                    });
+                });
+            };
+            document.body.appendChild(loaderScript);
+        }
+
+        // Defer init until the browser has painted the instant UI
+        requestAnimationFrame(() => {
+            requestAnimationFrame(initializeMonaco);
+        });
+
+        // 5. Layout & Sidebar Logic
+        function updateLayout() {
+            const isDesktop = window.innerWidth >= 768;
+            if (isDesktop) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.add('hidden');
+                body.style.overflow = '';
+                if (isDesktopCollapsed) {
+                    body.classList.add('sidebar-collapsed');
+                } else {
+                    body.classList.remove('sidebar-collapsed');
+                }
+                isMobileOpen = false;
+            } else {
+                body.classList.remove('sidebar-collapsed');
+                if (isMobileOpen) {
+                    sidebar.classList.remove('-translate-x-full');
+                    overlay.classList.remove('hidden');
+                    setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+                    body.style.overflow = 'hidden';
+                } else {
+                    sidebar.classList.add('-translate-x-full');
+                    overlay.classList.add('opacity-0');
+                    setTimeout(() => {
+                        if (!isMobileOpen) overlay.classList.add('hidden');
+                    }, 300);
+                    body.style.overflow = '';
+                }
+            }
+            if (monacoEditor) setTimeout(() => monacoEditor.layout(), 300);
+        }
+
+        function toggleSidebar() {
+            const isDesktop = window.innerWidth >= 768;
+            if (isDesktop) {
+                isDesktopCollapsed = !isDesktopCollapsed;
+                localStorage.setItem('sidebarCollapsed', isDesktopCollapsed);
+                updateLayout();
+            } else {
+                isMobileOpen = !isMobileOpen;
+                updateLayout();
+            }
+        }
+
+        toggleBtn.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', () => {
+            if (window.innerWidth < 768 && isMobileOpen) {
+                isMobileOpen = false;
+                updateLayout();
+            }
+        });
+        window.addEventListener('resize', updateLayout);
+        updateLayout();
+
+        // 6. Application Logic & Utilities
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'bg-surface border border-border-subtle text-text-main px-4 py-2 rounded-lg shadow-lg text-sm font-medium transform translate-y-4 opacity-0 transition-all duration-300 flex items-center gap-2';
+            toast.innerHTML = `<i data-lucide="check-circle-2" class="w-4 h-4 text-primary"></i> ${message}`;
+
+            container.appendChild(toast);
+            lucide.createIcons({
+                root: toast
+            });
+
+            requestAnimationFrame(() => toast.classList.remove('translate-y-4', 'opacity-0'));
+            setTimeout(() => {
+                toast.classList.add('translate-y-4', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function updatePreviewPanel() {
+            if (!monacoEditor) return;
+            previewFrame.srcdoc = monacoEditor.getValue();
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        const debouncedUpdate = debounce(() => {
+            updatePreviewPanel();
+            statusIndicator.classList.add('hidden');
+            statusIndicator.classList.remove('flex');
+        }, 600);
+
+        // Responsive Preview 
+        const resDesktop = document.getElementById('res-desktop');
+        const resMobile = document.getElementById('res-mobile');
+
+        function setResponsiveMode(mode) {
+            [resDesktop, resMobile].forEach(btn => {
+                btn.classList.remove('text-text-main', 'bg-surface', 'shadow-sm');
+                btn.classList.add('text-text-muted');
+            });
+            if (mode === 'desktop') {
+                resDesktop.classList.add('text-text-main', 'bg-surface', 'shadow-sm');
+                resDesktop.classList.remove('text-text-muted');
+                previewFrame.style.maxWidth = '100%';
+                previewFrame.classList.remove('border-x', 'border-border-subtle');
+            } else if (mode === 'mobile') {
+                resMobile.classList.add('text-text-main', 'bg-surface', 'shadow-sm');
+                resMobile.classList.remove('text-text-muted');
+                previewFrame.style.maxWidth = '375px';
+                previewFrame.classList.add('border-x', 'border-border-subtle');
+            }
+        }
+
+        resDesktop.addEventListener('click', () => setResponsiveMode('desktop'));
+        resMobile.addEventListener('click', () => setResponsiveMode('mobile'));
+
+        // Split Panel Resizer 
+        const dragResizer = document.getElementById('drag-resizer');
+        const splitContainer = document.getElementById('split-container');
+        const editorPane = document.getElementById('editor-pane');
+        let isResizing = false;
+
+        dragResizer.addEventListener('mousedown', function(e) {
+            isResizing = true;
+            document.body.style.cursor = 'col-resize';
+            previewFrame.style.pointerEvents = 'none';
+            editorContainer.style.pointerEvents = 'none';
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!isResizing) return;
+            const containerRect = splitContainer.getBoundingClientRect();
+            let newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+            newWidth = Math.max(20, Math.min(newWidth, 80));
+            editorPane.style.setProperty('--editor-width', `${newWidth}%`);
+        });
+
+        document.addEventListener('mouseup', function(e) {
+            if (isResizing) {
+                isResizing = false;
+                document.body.style.cursor = '';
+                previewFrame.style.pointerEvents = '';
+                editorContainer.style.pointerEvents = '';
+            }
+        });
+
+        // 7. Action Bindings
+        document.getElementById('btn-open-tab').addEventListener('click', () => {
+            if (!monacoEditor) return;
+            const newTab = window.open();
+            if (newTab) {
+                newTab.document.open();
+                newTab.document.write(monacoEditor.getValue());
+                newTab.document.close();
+            } else {
+                showToast('Popup blocked. Please allow popups.');
+            }
+        });
+
+        document.getElementById('btn-format').addEventListener('click', () => {
+            if (!monacoEditor || typeof html_beautify === 'undefined') return;
+            const val = monacoEditor.getValue();
+            if (!val.trim()) return;
+            const formatted = html_beautify(val, {
+                indent_size: 4,
+                preserve_newlines: true,
+                max_preserve_newlines: 1
+            });
+            monacoEditor.setValue(formatted);
+            showToast('HTML formatted');
+        });
+
+        document.getElementById('btn-clear').addEventListener('click', () => {
+            if (monacoEditor) monacoEditor.setValue('');
+            if (isLivePreview) updatePreviewPanel();
+        });
+
+        document.getElementById('btn-sample').addEventListener('click', () => {
+            if (monacoEditor) monacoEditor.setValue(SAMPLE_HTML);
+            if (isLivePreview) updatePreviewPanel();
+            showToast('Sample loaded');
+        });
+
+        document.getElementById('btn-reset').addEventListener('click', () => {
+            if (monacoEditor) monacoEditor.setValue('');
+            previewFrame.srcdoc = '';
+            showToast('Workspace reset');
+        });
+
+        document.getElementById('btn-import').addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file || !monacoEditor) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                monacoEditor.setValue(event.target.result);
+                if (isLivePreview) updatePreviewPanel();
+                showToast('File imported');
+            };
+            reader.readAsText(file);
+            fileInput.value = '';
+        });
+
+        document.getElementById('btn-export').addEventListener('click', () => {
+            if (!monacoEditor) return;
+            const val = monacoEditor.getValue();
+            if (!val.trim()) {
+                showToast('Nothing to export');
+                return;
+            }
+            const blob = new Blob([val], {
+                type: 'text/html'
+            });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'preview-export.html';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('File exported');
+        });
+
+        document.getElementById('btn-copy').addEventListener('click', () => {
+            if (!monacoEditor) return;
+            const val = monacoEditor.getValue();
+            if (!val) return;
+            const textArea = document.createElement("textarea");
+            textArea.value = val;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast('Code copied to clipboard');
+            } catch (err) {
+                console.error('Copy failed', err);
+            }
+            document.body.removeChild(textArea);
+        });
+    </script>
+</body>
+
+</html>
